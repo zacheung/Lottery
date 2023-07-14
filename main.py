@@ -97,15 +97,15 @@ def run(name):
 
     # logger.info('【{}】最新一期期号：{}'.format(name_path[name]['name'], current_num))
 
-    draw(df, 'prize_pool_bonus', '奖池奖金')
-    draw(df, 'first_prize_number', '一等奖注数')
-    draw(df, 'first_prize_bonus', '一等奖单注奖金')
-    draw(df, 'second_prize_number', '二等奖注数')
-    draw(df, 'second_prize_bonus', '二等奖单注奖金')
-    draw(df, 'total_amount', '总投注额')
+    draw(df, name, 'prize_pool_bonus', '奖池奖金')
+    draw(df, name, 'first_prize_number', '一等奖注数')
+    draw(df, name, 'first_prize_bonus', '一等奖单注奖金')
+    draw(df, name, 'second_prize_number', '二等奖注数')
+    draw(df, name, 'second_prize_bonus', '二等奖单注奖金')
+    draw(df, name, 'total_amount', '总投注额')
 
 
-def draw(df, column_name, ylabel):
+def draw(df, name, column_name, ylabel):
     plt.rcParams['font.sans-serif'] = ['SimHei']
     fig = plt.figure(figsize=(16, 9))
     df_copy = df.copy()
@@ -125,7 +125,8 @@ def draw(df, column_name, ylabel):
     plt.ylabel(ylabel)
     plt.title(f'{ylabel}随时间变化')
     plt.grid(True, linestyle='--', linewidth=0.5, alpha=0.5)
-    plt.show()
+    plt.savefig(name_path[name]['analysis'] + column_name + '.png')
+    # plt.show()
 
 
 if __name__ == '__main__':
