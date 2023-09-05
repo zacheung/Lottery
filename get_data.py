@@ -1,8 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time ： 2023/9/4 14:53
-@Auth ： Zach
-"""
+import os
 import argparse
 import requests
 from bs4 import BeautifulSoup
@@ -13,11 +9,13 @@ import matplotlib.pyplot as plt
 from loguru import logger
 
 
-def write_log(message):
-    """打印并保存日志"""
-    logger.add(name_path[args.name]['log_file'], level='INFO', format="{time} - {level} - {message}")  # 创建一个日志记录器
-    logger.info(message)  # 打印日志
-    # logger.warning('sss')
+def write_log(message, level='INFO'):
+    if level == 'INFO':
+        logger.add(name_path[args.name]['log_file'], level="INFO")
+        logger.info(message)
+    elif level == 'ERROR':
+        logger.add(name_path[args.name]['log_file'], level="ERROR")
+        logger.error(message)
 
 
 def get_soup(url):
@@ -40,17 +38,16 @@ def run(name):
 
     start = 1
     url = f'http://datachart.500.com/{name}/history/newinc/history.php?start={start}&end={latest_num}'
-
     soup = get_soup(url)
     rows = soup.find("tbody", attrs={"id": "tdata"}).find_all("tr")  # 所有行
-    print(len(rows))
-
-    data = parse_soup(rows)
+    data = parse_soup(rows)  # 解析爬取的网页
     df = pd.DataFrame(data)
+
+    if not os.path.exists(name_path[name]["path"]):  # 如果文件夹不存在则创建
+        os.makedirs(name_path[name]["path"])
     df.to_csv("{}{}".format(name_path[name]["path"], data_file_name), encoding="utf-8")  # 保存数据到本地，后续不必频繁爬取
 
-    # logger.info('开始画图并保存')
-
+    write_log(f'开始画分析图并保存')
     draw(df, name, 'prize_pool_bonus', '奖池奖金')
     draw(df, name, 'first_prize_number', '一等奖注数')
     draw(df, name, 'first_prize_bonus', '一等奖单注奖金')
@@ -142,6 +139,8 @@ def draw(df, name, column_name, ylabel):
     plt.ylabel(ylabel)
     plt.title(f'{ylabel}随时间变化')
     plt.grid(True, linestyle='--', linewidth=0.5, alpha=0.5)
+    if not os.path.exists(name_path[name]['analysis']):  # 如果文件夹不存在则创建
+        os.makedirs(name_path[name]['analysis'])
     plt.savefig(name_path[name]['analysis'] + column_name + '.png')
     # plt.show()
 
